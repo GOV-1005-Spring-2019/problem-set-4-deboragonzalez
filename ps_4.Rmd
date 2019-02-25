@@ -54,8 +54,9 @@ Time <-  nc_election %>%
   group_by(response) %>%
   summarize(min_time = min(timestamp)) %>%
   spread(response, min_time) %>%
-  summarize(time_diff = Rep - Dem)
-  round(11.3333, digits = 2)
+  summarize(time_diff = Rep - Dem) %>%
+  pull(time_diff) %>%
+  round(time_diff, digits = 2)
   # round(time_diff, digits = 2)
  
   # 11
