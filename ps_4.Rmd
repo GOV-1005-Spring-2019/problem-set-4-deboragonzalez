@@ -7,4 +7,71 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(tidyverse)
+
+nc_election <- read_csv("ps_4_elections-poll-nc09-3.csv")
+
+
+
 ```
+
+
+## Question 1
+
+```{r}
+Dems <- nc_election %>%
+  filter(response %in% c("Rep", "Dem", "Und")) %>%
+  group_by(response) %>%
+  count() %>%
+  spread(response, n) %>%
+  pull(Dem)
+
+
+Reps <- nc_election %>%
+  filter(response %in% c("Rep", "Dem", "Und")) %>%
+  count(response) %>%
+  spread(response, n) %>%
+  summarize(Reps = Rep - Und) %>%
+  pull(Reps)
+  # I could also mutate to create the new variable and then pull the result. 
+
+Gender <- nc_election %>%
+  filter(response %in% c("Rep", "Dem", "Und")) %>%
+  filter(gender != gender_combined)
+  # Will use nrows() in inline code to refer to the number of individuals with different genders between the two variables. 
+
+
+Race <- nc_election %>%
+  filter(response %in% c("Rep", "Dem", "Und")) %>%
+  filter(race_eth == "White") %>%
+  filter(race_eth != file_race_black) %>%
+  nrow()
+  
+
+Time <-  nc_election %>%
+  filter(response %in% c("Rep", "Dem")) %>%
+  group_by(response) %>%
+  summarize(min_time = min(timestamp)) %>%
+  spread(response, min_time) %>%
+  summarize(time_diff = Rep - Dem)
+  round(11.3333, digits = 2)
+  # round(time_diff, digits = 2)
+ 
+  # 11
+
+# Must find the min of both Reps and Dems 
+  
+  
+```
+
+
+There were `r Dems` respondents who supported the Democratic candidate.
+
+There were `r Reps` more respondents who favored the Republican candidate than who were Undecided.
+
+There are two gender variables (gender and gender_combined). There are `r nrow(Gender)` individuals for whom these variables have different values.
+
+There are `r Race` respondents listed as “White” under race_eth who are not listed as “White” under file_race_black.
+
+The first response of Rep came X minutes (rounded to the nearest minute) before the first response of Dem.
