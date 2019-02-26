@@ -34,7 +34,7 @@ Dems <- nc_election %>%
   count() %>%
   spread(response, n) %>%
   pull(Dem)
-  # There is probably a faster way to do this, but I counted to get the number of answers per response type, then I spread it so that the types of responses become columns, and then I pull Dem to get the number of people who support democrats in the dataset.
+  # There is probably a faster way to do this, but I counted to get the number of answers per response type, then I spread it so that the types of responses (Dem, Rep, Und, etc) become columns, and then I pull Dem to get the number of respondents who support democrats in the dataset.
 
 # Difference between Republicans & Undecided
 Reps <- nc_election %>%
@@ -43,19 +43,20 @@ Reps <- nc_election %>%
   spread(response, n) %>%
   summarize(Reps = Rep - Und)
   # I could also mutate to create the new variable and then pull the result. 
-# For this one, I added the filter just to make it more visually appealing to me and to get rid of irrelevant third party data, however, it is not necessary. Just like last time, I counted and spread to make the affiliations columns. Then, I summarized to create a new variable made by substracting the number of undecided voters from the number of Republicans. This new value is the number of more republicans than undecided respondents.
+  # For this one, I added the filter just to make it more visually appealing to me and to get rid of irrelevant third party data, however, it is not necessary. Just like last time, I counted and spread to make the affiliations columns. Then, I summarized to create a new variable made by substracting the number of undecided respondents from the number of Republicans. This new value is the number of more republicans than undecided respondents.
 
+# Number of individuals with different gender values
 Gender <- nc_election %>%
-  filter(response %in% c("Rep", "Dem", "Und")) %>%
   filter(gender != gender_combined)
-  # Will use nrows() in inline code to refer to the number of individuals with different genders between the two variables. 
+  # This filter (!=) helps us to identify the individuals whose two gender variables differ in value. Using nrows() in inline code to refer to the number of individuals with different genders between the two variables by counting the number of rows in the tibble provided by this code. 
 
-
+# Number of "White" respondents with race variables that differ in value
 Race <- nc_election %>%
   filter(race_eth == "White") %>%
   filter(race_eth != file_race_black)
-  
+  # We filter for those respondents who are labeled "White" in the race_eth variable to reduce the amount of unnecessary data. Then, we filter for differences between race_eth and file_race_black (the other race variable) in order to identify the number of "White" respondents who have a different value for the file_race_black variable.
 
+# Minute difference between the first Democrat and Republican respondents
 Time <-  nc_election %>%
   filter(response %in% c("Rep", "Dem")) %>%
   group_by(response) %>%
@@ -63,9 +64,8 @@ Time <-  nc_election %>%
   spread(response, min_time) %>%
   mutate(time_diff = round(Rep - Dem, digits = 0)) %>%
   select(time_diff) 
-  
+  # Since I need to use the first timestamps of only republicans and democrats, I will filter for just them. Grouping by response helps organize the data and will allow me to see the first timestamp of Rep and Dem respectively when I summarize for the minimum timestamp (the smaller = first in terms of time). Spread fixes the table so that Rep and Dem become columns so that I can then create a new variable (time_diff) with the difference of the two columns with mutate. By trial and error I figured out that round works inside the mutate, but won't work with a variable outside the mutate itself. Digits = 0 because there are no digits after the decimal point, I want whole minutes. Finally, I select time_diff to isolate the difference in time response.
 # Must find the min of both Reps and Dems 
-  
   
 ```
 
@@ -79,7 +79,8 @@ There are two gender variables (gender and gender_combined). There are `r nrow(G
 There are `r nrow(Race)` respondents listed as “White” under race_eth who are not listed as “White” under file_race_black.
 
 The first response of Dem came `r Time` minutes (rounded to the nearest minute) before the first response of Rep. 
-(Sorry about the typo! :/)
+
+Note: Fixed the typo per Dylan's instruction. 
 
 
 ## Question 2
@@ -126,8 +127,7 @@ nc_election %>%
 
 ```{r, echo = FALSE, results = TRUE}
 # Distribution of Democrats and Republicans by Education Level by Gender.
-
-edu_gen_party <- nc_election %>%
+nc_election %>%
   select(response, gender, educ, file_race) %>%
   # These are the variables I am going to use in my plot. I selected file_race as well because I was testing this same data visual set up but with race instead of gender. There were not
   filter(educ != "[DO NOT READ] Refused", response %in% c("Rep", "Dem")) %>%
@@ -146,8 +146,7 @@ edu_gen_party <- nc_election %>%
 ## Additional Plots (just for fun)
 ```{r, echo = FALSE, results= TRUE}
 # Distribution of Average Timestamp by Gender (jitter)
-
-procrastination_gender_jitter <- nc_election %>%
+nc_election %>%
   select(gender, timestamp) %>%
   group_by(gender, timestamp) %>%
   ggplot(aes(x=gender, y = timestamp, color =gender)) + geom_jitter(show.legend = FALSE) +
@@ -159,8 +158,7 @@ procrastination_gender_jitter <- nc_election %>%
 
 ```{r, echo = FALSE, results="asis"}
 # Distribution of Average Timestamp by Gender (boxplot)
-
-procrastination_gender_boxplot <- nc_election %>%
+nc_election %>%
   select(gender, timestamp) %>%
   group_by(gender, timestamp) %>%
   ggplot(aes(x=gender, y = timestamp, color =gender)) + geom_boxplot(show.legend = FALSE) +
