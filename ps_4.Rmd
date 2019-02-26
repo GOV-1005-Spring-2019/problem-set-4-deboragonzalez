@@ -8,13 +8,17 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(readr)
+# Using this library to read in the file.
+nc_election <- read_csv("ps_4_elections-poll-nc09-3.csv")
+
+# The following libraries are necessary to access the functions necessary such as spread, filter and summarize.
 library(tidyverse)
 library(devtools)
 library(lubridate)
 library(gt)
+# The gt library is necessary for the table we are going to recreate in this PSET.
 library(ggplot2)
-nc_election <- read_csv("ps_4_elections-poll-nc09-3.csv")
-
+# I am using this library to create my own plot(s). Yes, I made an extra one!
 
 
 ```
@@ -23,19 +27,23 @@ nc_election <- read_csv("ps_4_elections-poll-nc09-3.csv")
 ## Question 1
 
 ```{r, echo = FALSE}
+# Number of respondent who supported democratic candidate
 Dems <- nc_election %>%
   group_by(response) %>%
+  # Response seems to provide what people answered when asked about their political support, so I will use that one.
   count() %>%
   spread(response, n) %>%
   pull(Dem)
+  # There is probably a faster way to do this, but I counted to get the number of answers per response type, then I spread it so that the types of responses become columns, and then I pull Dem to get the number of people who support democrats in the dataset.
 
-
+# Difference between Republicans & Undecided
 Reps <- nc_election %>%
   filter(response %in% c("Rep", "Dem", "Und")) %>%
   count(response) %>%
   spread(response, n) %>%
   summarize(Reps = Rep - Und)
   # I could also mutate to create the new variable and then pull the result. 
+# For this one, I added the filter just to make it more visually appealing to me and to get rid of irrelevant third party data, however, it is not necessary. Just like last time, I counted and spread to make the affiliations columns. Then, I summarized to create a new variable made by substracting the number of undecided voters from the number of Republicans. This new value is the number of more republicans than undecided respondents.
 
 Gender <- nc_election %>%
   filter(response %in% c("Rep", "Dem", "Und")) %>%
@@ -116,18 +124,53 @@ nc_election %>%
 
 ## Question 4
 
-```{r, echo = FALSE, results="asis"}
-nc_election %>%
+```{r, echo = FALSE, results = TRUE}
+# Distribution of Democrats and Republicans by Education Level by Gender.
+
+edu_gen_party <- nc_election %>%
   select(response, gender, educ, file_race) %>%
-  # I selected file_race as well because 
+  # These are the variables I am going to use in my plot. I selected file_race as well because I was testing this same data visual set up but with race instead of gender. There were not
   filter(educ != "[DO NOT READ] Refused", response %in% c("Rep", "Dem")) %>%
   mutate(educ = fct_relevel(educ, c("Grade school", "High school", "Some college or trade school", "Bachelors' degree", "Graduate or Professional Degree"))) %>%
   group_by(response, educ) %>%
-  ggplot(aes(x=educ, y = response, color = educ)) + geom_jitter(show.legend = FALSE) + coord_flip() + facet_wrap(~gender)
-  
-  
-  
-  
+  ggplot(aes(x=educ, y = response, color = educ)) + 
+  geom_jitter(show.legend = FALSE) + 
+  coord_flip() + 
+  facet_wrap(~gender) +
+  xlab(NULL) +
+  ylab("Political Affiliation") +
+  labs(title = "Political Affiliation by Education and Gender",
+       caption = "New York Times Upshot/Siena College 2018 live polls")
 ```
 
-Diego M., Chris O., Chris M., Beau M., Dylan
+## Additional Plots (just for fun)
+```{r, echo = FALSE, results= TRUE}
+# Distribution of Average Timestamp by Gender (jitter)
+
+procrastination_gender_jitter <- nc_election %>%
+  select(gender, timestamp) %>%
+  group_by(gender, timestamp) %>%
+  ggplot(aes(x=gender, y = timestamp, color =gender)) + geom_jitter(show.legend = FALSE) +
+  xlab("Gender") +
+  ylab("Day of Response Submission") +
+  labs(title = "Timing of Response Submissions by Gender",
+       caption = "New York Times Upshot/Siena College 2018 live polls")
+```
+
+```{r, echo = FALSE, results="asis"}
+# Distribution of Average Timestamp by Gender (boxplot)
+
+procrastination_gender_boxplot <- nc_election %>%
+  select(gender, timestamp) %>%
+  group_by(gender, timestamp) %>%
+  ggplot(aes(x=gender, y = timestamp, color =gender)) + geom_boxplot(show.legend = FALSE) +
+  xlab("Gender") +
+  ylab("Day of Response Submission") +
+  labs(title = "Timing of Response Submissions by Gender",
+       caption = "New York Times Upshot/Siena College 2018 live polls")
+```
+
+
+## Collaborators
+
+Diego M., Chris O., Chris M., Beau M., Dylan.
