@@ -105,8 +105,15 @@ nc_election %>%
   filter(educ != "[DO NOT READ] Refused") %>% 
   mutate(educ = fct_relevel(educ, c("Grade school", "High school", "Some college or trade school", "Bachelors' degree", "Graduate or Professional Degree"))) %>%
   ggplot(aes(y= final_weight, x = educ)) +
-  geom_violin() + geom_jitter(alpha = .4, width = .2) +
-  coord_flip()
+  geom_violin() + geom_jitter(alpha = .4, width = .2, height = 0.2) +
+  coord_flip() + 
+  xlab(NULL) +
+  ylab("Weight Given to Respondent in Calculating Poll Results") +
+  labs(title = "More Educated Matter Less in North Carolina 9th",
+       subtitle = "Poll gives more weight to people who are less likely to participate in polls",
+       caption = "New York Times Upshot/Siena College 2018 live polls")
+  
+  
 
   
 
