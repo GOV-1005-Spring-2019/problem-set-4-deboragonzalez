@@ -95,18 +95,18 @@ nc_election %>%
   group_by(response, race_eth) %>%
   # Grouping in this order will help me spread the table later when I create the sum of final_weight variable.
   summarize(total = sum(final_weight)) %>%
-  # Need to create this total variable in order to calculate the weighted proportions of response by race.
+  # Need to create this total variable in order to calculate the weighted number/proportions of response by race.
   spread(key =  response, value = total, fill = 0) %>% 
-  # Spread so that our chart shows 
+  # Spread so that our chart shows race in the first column and the response categories as the following set of columns. We use fill = 0 so that NA values can be calculated and weighted as well. 
   mutate(all = Dem + Rep + Und + `3`) %>% 
   mutate(Dem = Dem / all) %>% 
   mutate(Rep = Rep / all) %>% 
   mutate(Und = Und / all) %>% 
-  # This chunk of code creates the proportions from the total. 
+  # This chunk of code creates the proportions from the total. It creates a set of variables that we can use to calculate the exact weighted proportions of our data.
   select(-all, -`3`) %>% 
-  # This diselects the all and third party columns from the table we are about to make.
+  # This diselects the all and third party columns from the table we are about to make so that it does not show.
   ungroup() %>% 
-  # Will now explicitly ungroup so that I don't carry my 
+  # Will now explicitly ungroup so that I don't carry my grouping settings (which facilitated the making of proportions) into the final chart. 
   na_if(0) %>%
   # Using this function to get rid of the 0 in the proportion of Asian undecided voters.
   gt() %>% 
@@ -123,17 +123,21 @@ nc_election %>%
 ## Question 3
 ```{r, echo = FALSE, results="asis"}
 nc_election %>%
-  select(educ, final_weight) %>%
+  select(educ, final_weight) %>% 
   filter(educ != "[DO NOT READ] Refused") %>% 
+  # Selected the variables needed for the graph and cleaned out the education variable from unnecessary data (those who did not provide education level). Using mutate and fct_relevel to order educ (on its axis) in a chronological/logical manner to mirror the model.
   mutate(educ = fct_relevel(educ, c("Grade school", "High school", "Some college or trade school", "Bachelors' degree", "Graduate or Professional Degree"))) %>%
-  ggplot(aes(y= final_weight, x = educ)) +
+  # Now, we are ready to make the graph using ggplot. Since educ is a categorical variable, I'm assigning it to the x-axis. Using geom_violin and geon_jitter to mimic the graph provided (alpha = .4 and width = .2 are the most similar I could get to the model graph.) 
+  ggplot(aes(x = educ, y= final_weight)) +
   geom_violin() + geom_jitter(alpha = .4, width = .2) +
   coord_flip() + 
+  # Had to flip coordinates to mirror the model graph and also because of aesthetics and x-axis category labels (long).
   xlab(NULL) +
   ylab("Weight Given to Respondent in Calculating Poll Results") +
   labs(title = "More Educated Matter Less in North Carolina 9th",
        subtitle = "Poll gives more weight to people who are less likely to participate in polls",
        caption = "New York Times Upshot/Siena College 2018 live polls")
+  # Using the above functions I was able to mirror the labels of the model graph.
 ```
 
 ## Question 4
