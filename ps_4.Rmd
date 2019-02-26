@@ -80,7 +80,7 @@ There are `r nrow(Race)` respondents listed as “White” under race_eth who ar
 
 The first response of Dem came `r Time` minutes (rounded to the nearest minute) before the first response of Rep. 
 
-Note: Fixed the typo per Dylan's instruction. 
+Note: Fixed the typo per Dillon's instruction. 
 
 
 ## Question 2
@@ -192,6 +192,6 @@ nc_election %>%
 ```
 
 
-## Collaborators
+## Colleagues
 
-Diego M., Chris O., Chris M., Beau M., Dylan.
+Diego M., Chris O., Chris M., Beau M., & Dillon S.
