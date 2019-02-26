@@ -70,7 +70,8 @@ There are two gender variables (gender and gender_combined). There are `r nrow(G
 
 There are `r nrow(Race)` respondents listed as “White” under race_eth who are not listed as “White” under file_race_black.
 
-The first response of Rep came `r Time` minutes (rounded to the nearest minute) before the first response of Dem.
+The first response of Dem came `r Time` minutes (rounded to the nearest minute) before the first response of Rep. 
+(Sorry about the typo! :/)
 
 
 ## Question 2
@@ -93,29 +94,40 @@ nc_election %>%
   fmt_percent(columns = vars(Dem, Rep, Und), decimals = 0) %>%
   cols_label(race_eth = "", Dem = "DEM.", Rep = "REP.", Und = "UND.") %>%
   tab_header(title = "Polling Results from North Carolina") %>%
-  tab_source_note(source_note = "Source: 3rd wave of North Carolina 9th Congressional District Election Poll") 
+  tab_source_note(source_note = "Source: New York Times Upshot/Siena College 2018 live polls") 
 
 ```
 
 ## Question 3
-```{r, echo = false}
-
+```{r, echo = FALSE, results="asis"}
 nc_election %>%
   select(educ, final_weight) %>%
   filter(educ != "[DO NOT READ] Refused") %>% 
   mutate(educ = fct_relevel(educ, c("Grade school", "High school", "Some college or trade school", "Bachelors' degree", "Graduate or Professional Degree"))) %>%
   ggplot(aes(y= final_weight, x = educ)) +
-  geom_violin() + geom_jitter(alpha = .4, width = .2, height = 0.2) +
+  geom_violin() + geom_jitter(alpha = .4, width = .2) +
   coord_flip() + 
   xlab(NULL) +
   ylab("Weight Given to Respondent in Calculating Poll Results") +
   labs(title = "More Educated Matter Less in North Carolina 9th",
        subtitle = "Poll gives more weight to people who are less likely to participate in polls",
        caption = "New York Times Upshot/Siena College 2018 live polls")
-  
-  
-
-  
-
 ```
 
+## Question 4
+
+```{r, echo = FALSE, results="asis"}
+nc_election %>%
+  select(response, gender, educ, file_race) %>%
+  # I selected file_race as well because 
+  filter(educ != "[DO NOT READ] Refused", response %in% c("Rep", "Dem")) %>%
+  mutate(educ = fct_relevel(educ, c("Grade school", "High school", "Some college or trade school", "Bachelors' degree", "Graduate or Professional Degree"))) %>%
+  group_by(response, educ) %>%
+  ggplot(aes(x=educ, y = response, color = educ)) + geom_jitter(show.legend = FALSE) + coord_flip() + facet_wrap(~gender)
+  
+  
+  
+  
+```
+
+Diego M., Chris O., Chris M., Beau M., Dylan
