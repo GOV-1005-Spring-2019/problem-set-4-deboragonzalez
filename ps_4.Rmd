@@ -9,7 +9,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(readr)
 library(tidyverse)
-
+library(devtools)
+library(lubridate)
 nc_election <- read_csv("ps_4_elections-poll-nc09-3.csv")
 
 
@@ -19,9 +20,8 @@ nc_election <- read_csv("ps_4_elections-poll-nc09-3.csv")
 
 ## Question 1
 
-```{r}
+```{r, echo = FALSE}
 Dems <- nc_election %>%
-  filter(response %in% c("Rep", "Dem", "Und")) %>%
   group_by(response) %>%
   count() %>%
   spread(response, n) %>%
@@ -32,8 +32,7 @@ Reps <- nc_election %>%
   filter(response %in% c("Rep", "Dem", "Und")) %>%
   count(response) %>%
   spread(response, n) %>%
-  summarize(Reps = Rep - Und) %>%
-  pull(Reps)
+  summarize(Reps = Rep - Und)
   # I could also mutate to create the new variable and then pull the result. 
 
 Gender <- nc_election %>%
@@ -45,8 +44,7 @@ Gender <- nc_election %>%
 Race <- nc_election %>%
   filter(response %in% c("Rep", "Dem", "Und")) %>%
   filter(race_eth == "White") %>%
-  filter(race_eth != file_race_black) %>%
-  nrow()
+  filter(race_eth != file_race_black)
   
 
 Time <-  nc_election %>%
@@ -54,13 +52,9 @@ Time <-  nc_election %>%
   group_by(response) %>%
   summarize(min_time = min(timestamp)) %>%
   spread(response, min_time) %>%
-  summarize(time_diff = Rep - Dem) %>%
-  pull(time_diff) %>%
-  round(time_diff, digits = 2)
-  # round(time_diff, digits = 2)
- 
-  # 11
-
+  mutate(time_diff = round(Rep - Dem, digits = 0)) %>%
+  select(time_diff) 
+  
 # Must find the min of both Reps and Dems 
   
   
@@ -73,6 +67,6 @@ There were `r Reps` more respondents who favored the Republican candidate than w
 
 There are two gender variables (gender and gender_combined). There are `r nrow(Gender)` individuals for whom these variables have different values.
 
-There are `r Race` respondents listed as “White” under race_eth who are not listed as “White” under file_race_black.
+There are `r nrow(Race)` respondents listed as “White” under race_eth who are not listed as “White” under file_race_black.
 
-The first response of Rep came X minutes (rounded to the nearest minute) before the first response of Dem.
+The first response of Rep came `r Time` minutes (rounded to the nearest minute) before the first response of Dem.
