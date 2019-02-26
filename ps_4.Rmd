@@ -12,6 +12,7 @@ library(tidyverse)
 library(devtools)
 library(lubridate)
 library(gt)
+library(ggplot2)
 nc_election <- read_csv("ps_4_elections-poll-nc09-3.csv")
 
 
@@ -90,9 +91,24 @@ nc_election %>%
   na_if(0) %>%
   gt() %>% 
   fmt_percent(columns = vars(Dem, Rep, Und), decimals = 0) %>%
-  tab_header(title = "Polling Results from North Carolina") %>%
   cols_label(race_eth = "", Dem = "DEM.", Rep = "REP.", Und = "UND.") %>%
-  tab_source_note(source_note = "Source: 3rd wave of North Carolina 9th Congressional District Election") 
+  tab_header(title = "Polling Results from North Carolina") %>%
+  tab_source_note(source_note = "Source: 3rd wave of North Carolina 9th Congressional District Election Poll") 
+
+```
+
+## Question 3
+```{r, echo = false}
+
+nc_election %>%
+  select(educ, final_weight) %>%
+  filter(educ != "[DO NOT READ] Refused") %>% 
+  mutate(educ = fct_relevel(educ, c("Grade school", "High school", "Some college or trade school", "Bachelors' degree", "Graduate or Professional Degree"))) %>%
+  ggplot(aes(y= final_weight, x = educ)) +
+  geom_violin() + geom_jitter(alpha = .4, width = .2) +
+  coord_flip()
+
+  
 
 ```
 
